@@ -3,6 +3,8 @@ import AuthService from "../services/AuthService";
 import { User } from "../models/User";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+const dotenv = require("dotenv");
+dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
