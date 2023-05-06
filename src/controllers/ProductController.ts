@@ -26,6 +26,8 @@ export class ProductController {
   }
 
   static async store(req: Request, res: Response) {
+    const { name, price, description, image } = req.body;
+    console.log(req.body);
     try {
       const product = await Product.create(req.body);
       res.json(product);

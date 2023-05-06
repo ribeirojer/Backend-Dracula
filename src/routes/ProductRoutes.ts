@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { ProductController } from "../controllers/ProductController";
-import { MercadoLibreController } from "../controllers/MercadoLibreController";
 
 const router = Router();
 
@@ -13,6 +12,5 @@ router.delete("/products/:id", ProductController.destroy);
 
 router.get("/products/:id/ratings", ProductController.show);
 router.post("/products/:id/rating", ProductController.store);
-router.post("/products/:id/payments", MercadoLibreController.toto);
 
 export default router;

@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { Order } from "../models/Order";
 import sequelize from "../config/database";
 import { OrderItem } from "../models/OrderItem";
+import { Product } from "../models/Product";
+import { MercadoLibreRepository } from "../repositories/MercadoLibreRepository";
 
 export class OrderController {
   static async index(req: Request, res: Response) {
@@ -29,29 +31,81 @@ export class OrderController {
   }
 
   static async store(req: Request, res: Response) {
+    const transaction = await sequelize.transaction();
     try {
-      const { items, ...orderData } = req.body;
-      console.log(items)
-      console.log(orderData)
-      const transaction = await sequelize.transaction();
+      const {
+        paymentInfo,
+        shippingInfo,
+        additionalInfo,
+        createAccount,
+        password,
+        confirmPassword,
+        cartItems,
+      } = req.body;
 
-      const order = await Order.create(orderData, { transaction });
-
-      for (const item of items) {
-        await OrderItem.create(
-          {
-            ...item,
-            orderId: order.id,
-          },
-          { transaction }
-        );
+      if (!paymentInfo || !shippingInfo || !cartItems) {
+        res.status(400).json({
+          message: "Missing required fields",
+        });
+        return;
       }
+      if (password !== confirmPassword) {
+        res.status(400).json({
+          message: "Passwords do not match",
+        });
+        return;
+      }
+      if (cartItems.length === 0) {
+        res.status(400).json({
+          message: "Cart is empty",
+        });
+        return;
+      }
+
+      const totalPrice = await Promise.all(
+        cartItems.map(async (item: any) => {
+          const product = await Product.findByPk(item.id, {
+            attributes: ["price"],
+            transaction,
+          });
+          if (!product) {
+            throw new Error(`Product with id ${item.id} not found`);
+          }
+          return product.price * item.quantity;
+        })
+      ).then((prices: number[]) =>
+        prices.reduce((acc, price) => acc + price, 0)
+      );
+
+      const order = await Order.create(
+        {
+          status: "pending",
+          totalPrice,
+          paymentMethod: "credit_card",
+          firstName: paymentInfo.firstName,
+          lastName: paymentInfo.lastName,
+          email: paymentInfo.email,
+          zipCode: shippingInfo.zipCode || paymentInfo.zipCode,
+          address: shippingInfo.logradouro || paymentInfo.logradouro,
+          numberAddress:
+            shippingInfo.numberAddress || paymentInfo.numberAddress,
+          complemento: shippingInfo.complemento || paymentInfo.complemento,
+          bairro: shippingInfo.bairro || paymentInfo.bairro,
+          city: shippingInfo.city || paymentInfo.city,
+          state: shippingInfo.state || paymentInfo.state,
+          tel: shippingInfo.tel || paymentInfo.tel,
+        },
+        { transaction }
+      );
+
+      const link = await MercadoLibreRepository.createPayment(order, cartItems);
 
       await transaction.commit();
 
-      res.json(order);
+      res.status(201).json(link);
     } catch (error) {
       console.error(error);
+      await transaction.rollback();
       res.status(500).json({ message: "Internal server error" });
     }
   }

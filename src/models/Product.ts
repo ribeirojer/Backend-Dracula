@@ -1,6 +1,5 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../config/database";
-import { IReview } from "../interfaces/ReviewInterface";
 
 class Product extends Model {
   public id!: number;
@@ -17,9 +16,10 @@ class Product extends Model {
   public category!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
-  public comments?: IReview[];
-  ratings: any;
-  createRating: any;
+  public comments?: any;
+  public features!: any;
+  public ratings: any;
+  public createRating: any;
 }
 
 Product.init(
@@ -83,6 +83,15 @@ Product.init(
     updatedAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+      allowNull: false,
+    },
+    comments: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+      allowNull: true,
+    },
+    features: {
+      type: DataTypes.JSON,
       allowNull: false,
     },
   },

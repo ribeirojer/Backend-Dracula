@@ -7,7 +7,7 @@ export class InventoryService {
         id: productId,
       },
     });
-    return product ? parseInt(product.stock) : 0;
+    return product ? parseInt(product.stock.toString()) : 0;
   }
 
   static async updateStock(productId: number, quantity: number): Promise<void> {
@@ -32,7 +32,7 @@ export class InventoryService {
         id: productId,
       },
     });
-    return product ? parseInt(product.stock) >= quantity : false;
+    return product ? parseInt(product.stock.toString()) >= quantity : false;
   }
 
   static async addProductToInventory(productData: any): Promise<Product> {
@@ -62,7 +62,7 @@ export class InventoryService {
     const products = await Product.findAll();
     return products;
   }
-  
+
   static async updateProductById(
     productId: number,
     productData: any

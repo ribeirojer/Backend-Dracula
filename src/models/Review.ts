@@ -1,9 +1,12 @@
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes, ModelStatic } from "sequelize";
 import sequelize from "../config/database";
 import { Product } from "./Product";
 import { User } from "./User";
 
 export class Review extends Model {
+  static associate() {
+    this.belongsTo(Product, { as: "product", foreignKey: "productId" });
+  }
   public id!: number;
   public title!: string;
   public content!: string;
