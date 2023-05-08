@@ -17,7 +17,7 @@ export class AuthController {
         res.status(400).json({ error: "Email and password are required" });
       }
 
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({ email });
       if (!user) {
         res.status(404).json({ error: "User not found" });
         return;
@@ -60,7 +60,7 @@ export class AuthController {
       }
 
       // Verificar se o email já está em uso
-      const existingUser = await User.findOne({ where: { email } });
+      const existingUser = await User.findOne({ email });
       if (existingUser) {
         res.status(400).json({ error: "Email already in use" });
         return;

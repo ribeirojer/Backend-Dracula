@@ -4,7 +4,7 @@ import { Product } from "../models/Product";
 export class ProductController {
   static async index(req: Request, res: Response) {
     try {
-      const products = await Product.findAll();
+      const products = await Product.find();
       res.json(products);
     } catch (error) {
       console.error(error);
@@ -14,7 +14,7 @@ export class ProductController {
 
   static async show(req: Request, res: Response) {
     try {
-      const product = await Product.findByPk(req.params.id);
+      const product = await Product.findOne({ id: req.params.id });
       if (!product) {
         return res.status(404).json({ message: "Produto não encontrado" });
       }
@@ -39,11 +39,11 @@ export class ProductController {
 
   static async update(req: Request, res: Response) {
     try {
-      const product = await Product.findByPk(req.params.id);
+      const product = await Product.findOne({ id: req.params.id });
       if (!product) {
         return res.status(404).json({ message: "Produto não encontrado" });
       }
-      await product.update(req.body);
+      await product.updateOne(req.body);
       res.json(product);
     } catch (error) {
       console.error(error);
@@ -53,11 +53,11 @@ export class ProductController {
 
   static async destroy(req: Request, res: Response) {
     try {
-      const product = await Product.findByPk(req.params.id);
+      const product = await Product.findOne({ id: req.params.id });
       if (!product) {
         return res.status(404).json({ message: "Produto não encontrado" });
       }
-      await product.destroy();
+      await product.deleteOne();
       res.json({ message: "Produto excluído com sucesso" });
     } catch (error) {
       console.error(error);
@@ -67,13 +67,11 @@ export class ProductController {
 
   static async showRatings(req: Request, res: Response) {
     try {
-      const product = await Product.findByPk(req.params.id, {
-        include: "ratings",
-      });
+      const product = await Product.findOne({ id: req.params.id });
       if (!product) {
         return res.status(404).json({ message: "Produto não encontrado" });
       }
-      res.json(product.ratings);
+      res.json(product.rating);
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Erro interno do servidor" });
@@ -82,11 +80,11 @@ export class ProductController {
 
   static async storeRating(req: Request, res: Response) {
     try {
-      const product = await Product.findByPk(req.params.id);
+      const product = await Product.findOne({ id: req.params.id });
       if (!product) {
         return res.status(404).json({ message: "Produto não encontrado" });
       }
-      const rating = await product.createRating(req.body);
+      const rating = await product.updateOne(req.body);
       res.json(rating);
     } catch (error) {
       console.error(error);

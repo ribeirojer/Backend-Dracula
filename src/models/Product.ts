@@ -1,104 +1,75 @@
-import { Model, DataTypes } from "sequelize";
-import sequelize from "../config/database";
+import mongoose from "mongoose";
 
-class Product extends Model {
-  public id!: number;
-  public name!: string;
-  public brand!: string;
-  public price!: number;
-  public oldPrice?: number;
-  public description!: string;
-  public image!: string;
-  public stock!: number;
-  public rating!: number;
-  public salePercentage!: number;
-  public isNew!: boolean;
-  public category!: string;
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-  public comments?: any;
-  public features!: any;
-  public ratings: any;
-  public createRating: any;
-}
-
-Product.init(
+const reviewSchema = new mongoose.Schema(
   {
-    id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    name: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    brand: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    price: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    oldPrice: {
-      type: DataTypes.DECIMAL(10, 2),
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-    image: {
-      type: DataTypes.STRING(200),
-      allowNull: false,
-    },
-    stock: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    rating: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-      defaultValue: 0,
-    },
-    salePercentage: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0,
-    },
-    isNew: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
-    },
-    category: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
-    },
-    comments: {
-      type: DataTypes.JSON,
-      defaultValue: [],
-      allowNull: true,
-    },
-    features: {
-      type: DataTypes.JSON,
-      allowNull: false,
+    name: { type: String, required: true },
+    rating: { type: Number, required: true },
+    comment: { type: String, required: true },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
     },
   },
   {
-    sequelize,
-    tableName: "products",
+    timestamps: true,
   }
 );
+
+const productSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    image: {
+      type: String,
+      required: true,
+    },
+    brand: {
+      type: String,
+      required: true,
+    },
+    category: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    reviews: [reviewSchema],
+    rating: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    numReviews: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    price: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    countInStock: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const Product = mongoose.model("Product", productSchema);
 
 export { Product };

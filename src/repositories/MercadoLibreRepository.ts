@@ -1,7 +1,7 @@
 import { config } from "dotenv";
 import mercadopago from "mercadopago";
-import { Product } from "../models/Product";
-import { CartExtract } from "../interfaces/Product";
+import Product from "../models/Product";
+import { CartExtract, IElectronicProduct } from "../interfaces/Product";
 
 config({ path: ".env" });
 
@@ -20,7 +20,7 @@ export class MercadoLibreRepository {
     try {
       const products = await Promise.all(
         cartItems.map(async (item: any) => {
-          const product = await Product.findByPk(item.id);
+          const product = await Product.findOne(item.id);
           if (!product) {
             throw new Error(`Product with id ${item.id} not found`);
           }
@@ -29,7 +29,7 @@ export class MercadoLibreRepository {
       ).then((products) => products);
 
       // Cria um array de items a partir dos produtos do carrinho
-      const items = products.map((product: Product, index: number) => {
+      const items = products.map((product: any, index: number) => {
         const item = cartItems[index];
 
         return {

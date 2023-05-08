@@ -1,4 +1,4 @@
-import { IReview } from "./Review";
+import { IReview } from "./ReviewInterface";
 
 export interface IElectronicProduct {
   id: number;

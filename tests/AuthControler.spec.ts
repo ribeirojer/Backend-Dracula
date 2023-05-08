@@ -34,7 +34,58 @@ describe("POST /api/auth/login", () => {
       email: user.email,
     });
   });
-  /**
+
+  it("should return 400 if email or password are missing", async () => {
+    const res = await request(app).post("/login").send({});
+
+    expect(res.status).to.equal(400);
+    expect(res.body).to.deep.equal({
+      error: "Email and password are required",
+    });
+  });
+
+  it("should return 404 if user is not found", async () => {
+    const email = "test@test.com";
+
+    const res = await request(app)
+      .post("/login")
+      .send({ email, password: "password" });
+
+    expect(res.status).to.equal(404);
+    expect(res.body).to.deep.equal({ error: "User not found" });
+  });
+
+  it("should return 401 if password is invalid", async () => {
+    const email = "test@test.com";
+    const user = { id: 1, email, password: "password" };
+
+    const res = await request(app)
+      .post("/login")
+      .send({ email, password: "invalid_password" });
+
+    expect(res.status).to.equal(401);
+    expect(res.body).to.deep.equal({ error: "Invalid password" });
+  });
+
+  it("should return 200 with token and user data if login is successful", async () => {
+    const email = "test@test.com";
+    const password = "password";
+    const user = { id: 1, email, password };
+    const token = "test_token";
+
+    const res = await request(app).post("/login").send({ email, password });
+
+    expect(res.status).to.equal(200);
+    expect(res.body).to.deep.equal({
+      success: true,
+      message: "Authentication successful",
+      token,
+      user: {
+        id: user.id,
+      },
+    });
+  });
+
   it("deve retornar erro 404 se o usuário não existir", async () => {
     const response = await request(app)
       .post("/api/auth/login")
@@ -47,13 +98,13 @@ describe("POST /api/auth/login", () => {
   it("deve retornar erro 404 se a senha estiver incorreta", async () => {
     const response = await request(app)
       .post("/api/auth/login")
-      .send({ email: user.email, password: "wrong_password" })
+      .send({ email: "email@email.com", password: "wrong_password" })
       .expect(404);
 
     expect(response.body.error).toBe("Algo deu errado");
-  }); */
+  });
 });
-/**
+
 describe("POST /api/auth/register", () => {
   let user: { email: any };
   let token: string;
@@ -109,4 +160,4 @@ describe("POST /api/auth/register", () => {
 
     expect(response.body.error).toBe("message");
   });
-}); */
+});

@@ -1,14 +1,12 @@
 import { Request, Response } from "express";
 import { Order } from "../models/Order";
-import sequelize from "../config/database";
-import { OrderItem } from "../models/OrderItem";
 import { Product } from "../models/Product";
 import { MercadoLibreRepository } from "../repositories/MercadoLibreRepository";
 
 export class OrderController {
   static async index(req: Request, res: Response) {
     try {
-      const orders = await Order.findAll();
+      const orders = await Order.find();
       res.json(orders);
     } catch (error) {
       console.error(error);
@@ -18,7 +16,7 @@ export class OrderController {
 
   static async show(req: Request, res: Response) {
     try {
-      const order = await Order.findByPk(req.params.id);
+      const order = await Order.findOne({ id: req.params.id });
       if (order) {
         res.json(order);
       } else {
@@ -31,7 +29,7 @@ export class OrderController {
   }
 
   static async store(req: Request, res: Response) {
-    const transaction = await sequelize.transaction();
+    // const transaction = await sequelize.transaction();
     try {
       const {
         paymentInfo,
@@ -64,9 +62,9 @@ export class OrderController {
 
       const totalPrice = await Promise.all(
         cartItems.map(async (item: any) => {
-          const product = await Product.findByPk(item.id, {
+          const product = await Product.findOne(item.id, {
             attributes: ["price"],
-            transaction,
+            // transaction,
           });
           if (!product) {
             throw new Error(`Product with id ${item.id} not found`);
@@ -94,28 +92,28 @@ export class OrderController {
           city: shippingInfo.city || paymentInfo.city,
           state: shippingInfo.state || paymentInfo.state,
           tel: shippingInfo.tel || paymentInfo.tel,
-        },
-        { transaction }
+        }
+        // { transaction }
       );
 
       const link = await MercadoLibreRepository.createPayment(order, cartItems);
 
-      await transaction.commit();
+      // await transaction.commit();
 
       res.status(201).json(link);
     } catch (error) {
       console.error(error);
-      await transaction.rollback();
+      // await transaction.rollback();
       res.status(500).json({ message: "Internal server error" });
     }
   }
 
   static async update(req: Request, res: Response) {
     try {
-      const order = await Order.findByPk(req.params.id);
+      const order = await Order.findOne({ id: req.params.id });
       if (order) {
         const orderData = req.body;
-        const updatedOrder = await order.update(orderData);
+        const updatedOrder = await order.updateOne(orderData);
         res.json(updatedOrder);
       } else {
         res.status(404).json({ message: "Order not found" });
@@ -128,9 +126,9 @@ export class OrderController {
 
   static async destroy(req: Request, res: Response) {
     try {
-      const order = await Order.findByPk(req.params.id);
+      const order = await Order.findOne({ id: req.params.id });
       if (order) {
-        await order.destroy();
+        await order.deleteOne();
         res.json({ message: "Order deleted successfully" });
       } else {
         res.status(404).json({ message: "Order not found" });

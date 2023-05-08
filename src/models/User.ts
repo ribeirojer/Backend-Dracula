@@ -1,94 +1,110 @@
-import { Model, DataTypes } from "sequelize";
-import sequelize from "../config/database";
+import { Document, Schema, Model, model } from "mongoose";
 
-class User extends Model {
-  public id!: number;
-  public firstName!: string;
-  public lastName!: string;
-  public email!: string;
-  public password!: string;
-  public phoneNumber!: string;
-  public address!: {
-    street: string;
-    city: string;
-    state: string;
-    country: string;
-    zipCode: string;
-  };
-  public billingInfo!: {
-    cardNumber: string;
-    cardHolderName: string;
-    expirationDate: string;
-    cvv: string;
-  };
-  public createdAt!: Date;
-  public updatedAt!: Date;
-  public passwordResetToken!: string;
-  public passwordResetExpiresAt!: Date;
-  permissions: any;
-  favoriteProducts: any;
-}
+// interface IUser extends Document {
+//   firstName: string;
+//   lastName: string;
+//   email: string;
+//   password: string;
+//   phoneNumber?: string;
+//   address?: {
+//     street: string;
+//     city: string;
+//     state: string;
+//     country: string;
+//     zipCode: string;
+//   };
+//   billingInfo?: {
+//     cardNumber: string;
+//     cardHolderName: string;
+//     expirationDate: string;
+//     cvv: string;
+//   };
+//   createdAt: Date;
+//   updatedAt: Date;
+//   passwordResetToken?: string;
+//   passwordResetExpiresAt?: Date;
+//   permissions: any;
+//   favoriteProducts: any;
+// }
 
-User.init(
-  {
-    id: {
-      type: DataTypes.INTEGER.UNSIGNED,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    firstName: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    lastName: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    email: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-      unique: true,
-    },
-    password: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    phoneNumber: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: false,
-    },
-    address: {
-      type: DataTypes.JSON,
-      allowNull: true,
-    },
-    billingInfo: {
-      type: DataTypes.JSON,
-      allowNull: true,
-    },
-    passwordResetToken: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-    },
-    passwordResetExpiresAt: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
-      allowNull: true,
-    },
+const UserSchema: Schema = new Schema({
+  firstName: {
+    type: String,
+    required: true,
+    minlength: 1,
+    maxlength: 50,
   },
-  {
-    tableName: "users",
-    sequelize,
-  }
-);
+  lastName: {
+    type: String,
+    required: true,
+    minlength: 1,
+    maxlength: 50,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    minlength: 1,
+    maxlength: 100,
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 1,
+    maxlength: 255,
+  },
+  phoneNumber: {
+    type: String,
+    minlength: 1,
+    maxlength: 20,
+  },
+  address: {
+    type: {
+      street: String,
+      city: String,
+      state: String,
+      country: String,
+      zipCode: String,
+    },
+    default: null,
+  },
+  billingInfo: {
+    type: {
+      cardNumber: String,
+      cardHolderName: String,
+      expirationDate: String,
+      cvv: String,
+    },
+    default: null,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    required: true,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+    required: true,
+  },
+  passwordResetToken: {
+    type: String,
+    default: null,
+  },
+  passwordResetExpiresAt: {
+    type: Date,
+    default: null,
+  },
+  permissions: {
+    type: [],
+    default: null,
+  },
+  favoriteProducts: {
+    type: [],
+    default: null,
+  },
+});
+
+const User: Model<any> = model("User", UserSchema);
 
 export { User };

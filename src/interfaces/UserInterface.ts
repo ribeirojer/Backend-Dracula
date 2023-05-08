@@ -1,4 +1,6 @@
 export interface IUser {
+  passwordResetExpiresAt: Date;
+  passwordResetToken: string;
   id: number;
   firstName: string;
   lastName: string;

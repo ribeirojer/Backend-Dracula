@@ -1,86 +1,78 @@
-import { Model, DataTypes } from "sequelize";
-import sequelize from "../config/database";
-import { OrderItem } from "./OrderItem";
-import { User } from "./User";
-import { Product } from "./Product";
+import mongoose from "mongoose";
 
-class Order extends Model {
-  id!: number;
-  status!: string;
-  totalPrice!: number;
-
-  static associate() {
-    Order.belongsTo(User, { foreignKey: "userId" });
-    Order.hasMany(OrderItem, { as: "items", onDelete: "CASCADE" });
-    Order.belongsToMany(Product, {
-      through: "OrderProduct",
-      foreignKey: "orderId",
-    });
-  }
-}
-
-Order.init(
+const orderSchema = new mongoose.Schema(
   {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
     },
-    status: {
-      type: DataTypes.ENUM("pending", "processing", "shipped", "delivered", "canceled"),
-      allowNull: false,
-      defaultValue: "pending",
-    },
-    totalPrice: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-    },
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    address: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    city: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    state: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    country: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: "Brasil",
-    },
-    zipCode: {
-      type: DataTypes.STRING,
-      allowNull: false,
+    orderItems: [
+      {
+        name: { type: String, required: true },
+        qty: { type: Number, required: true },
+        image: { type: String, required: true },
+        price: { type: Number, required: true },
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          ref: "Product",
+        },
+      },
+    ],
+    shippingAddress: {
+      address: { type: String, required: true },
+      city: { type: String, required: true },
+      postalCode: { type: String, required: true },
+      country: { type: String, required: true },
     },
     paymentMethod: {
-      type: DataTypes.ENUM("credit_card", "debit_card", "boleto"),
-      allowNull: false,
+      type: String,
+      required: true,
     },
-    cardNumber: {
-      type: DataTypes.STRING,
+    paymentResult: {
+      id: { type: String },
+      status: { type: String },
+      update_time: { type: String },
+      email_address: { type: String },
     },
-    cardExpirationDate: {
-      type: DataTypes.DATE,
+    taxPrice: {
+      type: Number,
+      required: true,
+      default: 0.0,
     },
-    cardCvv: {
-      type: DataTypes.STRING,
+    shippingPrice: {
+      type: Number,
+      required: true,
+      default: 0.0,
     },
-    boletoNumber: {
-      type: DataTypes.STRING,
+    totalPrice: {
+      type: Number,
+      required: true,
+      default: 0.0,
+    },
+    isPaid: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    paidAt: {
+      type: Date,
+    },
+    isDelivered: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    deliveredAt: {
+      type: Date,
     },
   },
   {
-    sequelize,
-    modelName: "Order",
+    timestamps: true,
   }
 );
+
+const Order = mongoose.model("Order", orderSchema);
 
 export { Order };

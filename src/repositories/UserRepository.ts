@@ -1,8 +1,9 @@
+import { IUser } from "../interfaces/UserInterface";
 import { User } from "../models/User";
 
 export class UserRepository {
-  static async save(user: User) {
-    await User.update(
+  static async save(user: IUser) {
+    await User.updateOne(
       {
         firstName: user.firstName,
         lastName: user.lastName,
@@ -17,17 +18,17 @@ export class UserRepository {
       { where: { id: user.id } }
     );
 
-    const updatedUser = await User.findByPk(user.id);
+    const updatedUser = await User.findOne({ id: user.id });
     return updatedUser!;
   }
-  static generatePasswordResetToken(user: User) {
+  static generatePasswordResetToken(user: IUser) {
     const token = Math.random().toString(36).substr(2);
     user.passwordResetToken = token;
     user.passwordResetExpiresAt = new Date(Date.now() + 3600000); // 1 hora
     return token;
   }
 
-  static async findByPasswordResetToken(token: string): Promise<User | null> {
+  static async findByPasswordResetToken(token: string): Promise<IUser | null> {
     const user = await User.findOne({
       where: {
         passwordResetToken: token,
@@ -37,13 +38,13 @@ export class UserRepository {
 
     return user || null;
   }
-  static async findByEmail(email: string): Promise<User | null> {
+  static async findByEmail(email: string): Promise<IUser | null> {
     const user = await User.findOne({ where: { email } });
     return user || null;
   }
 
-  static async create(user: User): Promise<User> {
+  static async create(user: IUser): Promise<IUser> {
     const createdUser = await User.create();
-    return createdUser;
+    return createdUser[0];
   }
 }
