@@ -14,9 +14,10 @@ export class ProductController {
 
   static async show(req: Request, res: Response) {
     try {
-      const product = await Product.findOne({ id: req.params.id });
+      const product = await Product.findOne({ _id: req.params.id });
       if (!product) {
-        return res.status(404).json({ message: "Produto não encontrado" });
+        res.status(404).json({ message: "Produto não encontrado" });
+        return;
       }
       res.json(product);
     } catch (error) {
@@ -27,7 +28,7 @@ export class ProductController {
 
   static async store(req: Request, res: Response) {
     const { name, price, description, image } = req.body;
-    console.log(req.body);
+    
     try {
       const product = await Product.create(req.body);
       res.json(product);
@@ -39,9 +40,10 @@ export class ProductController {
 
   static async update(req: Request, res: Response) {
     try {
-      const product = await Product.findOne({ id: req.params.id });
+      const product = await Product.findOne({ _id: req.params.id });
       if (!product) {
-        return res.status(404).json({ message: "Produto não encontrado" });
+        res.status(404).json({ message: "Produto não encontrado" });
+        return;
       }
       await product.updateOne(req.body);
       res.json(product);
@@ -53,9 +55,10 @@ export class ProductController {
 
   static async destroy(req: Request, res: Response) {
     try {
-      const product = await Product.findOne({ id: req.params.id });
+      const product = await Product.findOne({ _id: req.params.id });
       if (!product) {
-        return res.status(404).json({ message: "Produto não encontrado" });
+        res.status(404).json({ message: "Produto não encontrado" });
+        return;
       }
       await product.deleteOne();
       res.json({ message: "Produto excluído com sucesso" });
