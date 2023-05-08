@@ -1,6 +1,5 @@
 import { IOrder } from "../interfaces/UserInterface";
 import { Order } from "../models/Order";
-import { Product } from "../models/Product";
 
 export class OrderService {
   static async createOrder(data: any): Promise<IOrder> {

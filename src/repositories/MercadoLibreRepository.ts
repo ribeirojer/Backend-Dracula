@@ -12,8 +12,12 @@ mercadopago.configure({
 });
 
 export class MercadoLibreRepository {
-  static async createPayment(order: any, cartItems: any[]): Promise<any> {
+  static async createPayment(
+    order: any,
+    cartItems: any[]
+  ): Promise<any> {
     try {
+      
       const products = await Promise.all(
         cartItems.map(async (item: any) => {
           const product = await Product.findOne({ _id: item.product });
@@ -22,9 +26,9 @@ export class MercadoLibreRepository {
           }
           return product;
         })
-      ).then((products) => products);
-
-      console.log("aqui", order, products);
+        ).then((products) => products);
+        
+        console.log("aqui", order, products)
       // Cria um array de items a partir dos produtos do carrinho
       const items = products.map((product: any, index: number) => {
         const item = cartItems[index];
