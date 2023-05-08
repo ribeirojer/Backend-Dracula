@@ -1,7 +1,6 @@
-import { config } from "dotenv";
 import mercadopago from "mercadopago";
-import Product from "../models/Product";
-import { CartExtract, IElectronicProduct } from "../interfaces/Product";
+import { Product } from "../models/Product";
+import { config } from "dotenv";
 
 config({ path: ".env" });
 
@@ -13,21 +12,19 @@ mercadopago.configure({
 });
 
 export class MercadoLibreRepository {
-  static async createPayment(
-    order: any,
-    cartItems: CartExtract[]
-  ): Promise<any> {
+  static async createPayment(order: any, cartItems: any[]): Promise<any> {
     try {
       const products = await Promise.all(
         cartItems.map(async (item: any) => {
-          const product = await Product.findOne(item.id);
+          const product = await Product.findOne({ _id: item.product });
           if (!product) {
-            throw new Error(`Product with id ${item.id} not found`);
+            throw new Error(`Product with id ${item.product} not found`);
           }
           return product;
         })
       ).then((products) => products);
 
+      console.log("aqui", order, products);
       // Cria um array de items a partir dos produtos do carrinho
       const items = products.map((product: any, index: number) => {
         const item = cartItems[index];
@@ -36,7 +33,7 @@ export class MercadoLibreRepository {
           id: String(product.id),
           title: product.name,
           description: product.description.slice(0, 255),
-          quantity: item.quantity,
+          quantity: item.qty,
           unit_price: parseFloat(product.price.toString()),
         };
       });
